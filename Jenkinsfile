@@ -63,11 +63,15 @@ stage('Deploy Application') {
 
         echo Starting Spring Boot Application...
 
-        for %%f in (target\\*.jar) do set JAR_FILE=%%f
+        set JAR_FILE=
 
-        echo Starting %%JAR_FILE%%
+        for %%f in (target\\*.jar) do (
+            set JAR_FILE=%%f
+        )
 
-        start "" /B cmd /c "java -jar %%JAR_FILE%% > app.log 2>&1"
+        echo Starting %JAR_FILE%
+
+        start "" /B java -jar %JAR_FILE% > app.log 2>&1
 
         timeout /t 10 > nul
 
