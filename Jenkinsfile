@@ -1,5 +1,4 @@
 pipeline {
-
     agent any
 
     tools {
@@ -13,11 +12,9 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout Source Code') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/Khushi124-tech/Bmc-Parking-Application.git'
+                git branch: 'main', url: 'https://github.com/prathamesh-codes/billdesk-firstProject.git'
             }
         }
 
@@ -33,65 +30,46 @@ pipeline {
             }
         }
 
-stage('Stop Existing Application') {
+        stage('Stop Existing Application') {
+            steps {
+                bat '''
+                @echo off
+                for /f "tokens=5" %%a in ('netstat -ano ^| findstr :9095') do (
+                    echo Stopping existing application PID %%a...
+                    taskkill /PID %%a /F
+                )
+                exit /b 0
+                '''
+            }
+        }
+
+        stage('Deploy Application') {
     steps {
         bat '''
         @echo off
-
-        set PID=
-
-        for /f "tokens=5" %%a in ('netstat -ano ^| findstr :9090') do (
-            set PID=%%a
-        )
-
-        if defined PID (
-            echo Stopping application running on port 9090...
-            taskkill /F /PID %PID%
-        ) else (
-            echo No application is running on port 9090.
-        )
-
-        exit /b 0
-        '''
-    }
-}
-
-stage('Deploy Application') {
-    steps {
-        bat '''
-        @echo off
-
         echo Starting Spring Boot Application...
 
-        set JAR_FILE=
+        :: Prevent Jenkins from terminating the application
+        set JENKINS_NODE_COOKIE=dontKillMe
 
-        for %%f in (target\\*.jar) do (
-            set JAR_FILE=%%f
-        )
+        :: Start the Spring Boot application in the background
+        start "" javaw -jar target\\LearningGIT-0.0.1-SNAPSHOT.jar > app.log 2>&1
 
-        echo Starting %JAR_FILE%
-
-        start "" /B java -jar %JAR_FILE% > app.log 2>&1
-
-        timeout /t 10 > nul
+        :: Wait for application startup
+        ping 127.0.0.1 -n 11 > nul
 
         echo Application Started Successfully.
         '''
     }
 }
-
     }
 
     post {
-
         success {
             echo 'Pipeline executed successfully.'
         }
-
         failure {
             echo 'Pipeline failed.'
         }
-
     }
-
 }
