@@ -57,7 +57,7 @@ pipeline {
         set JENKINS_NODE_COOKIE=dontKillMe
 
         :: Start the Spring Boot application in the background
-        start "Bmc-Parking-Application" /B cmd /c "java -jar target\\jenkins-0.0.1-SNAPSHOT.jar > app.log 2>&1"
+        start "Bmc-Parking-Application" /B cmd /c "java -jar target\\Bmc-Parking-Application-0.0.1-SNAPSHOT.jar > app.log 2>&1"
         :: Wait for application startup
         ping 127.0.0.1 -n 11 > nul
 
